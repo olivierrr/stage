@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "sudo node index",
+    "dev": "sudo node index"
   },
   "author": "olivierrr",
   "license": "MIT",
