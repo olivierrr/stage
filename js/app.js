@@ -1,19 +1,26 @@
 var SoundCloudAudioSource = function(player) {
     var self = this
-    var analyser
+
     var audioCtx = new (window.AudioContext || window.webkitAudioContext)
-    analyser = audioCtx.createAnalyser()
+
+    var analyser = audioCtx.createAnalyser()
     analyser.fftSize = 256
-    var source = audioCtx.createMediaElementSource(player)
-    source.connect(analyser)
     analyser.connect(audioCtx.destination)
 
-    this.lastTest = []
+    var source = audioCtx.createMediaElementSource(player)
+    source.connect(analyser)
+
+    //
+
     this.lastVolume = 0
     this.volume = 0
+    this.lastVolumes = [0,0,0,0]
+    this.volumes = [0,0,0,0]
     this.streamData = new Uint8Array(analyser.frequencyBinCount)
+
+    //
+
     this.playStream = function(streamUrl) {
-        // get the input stream from the audio element
         player.addEventListener('ended', function(){
             self.directStream('coasting')
         });
@@ -22,32 +29,31 @@ var SoundCloudAudioSource = function(player) {
     }
 
     var sampleAudioStream = function() {
+
+        // get data
         analyser.getByteFrequencyData(self.streamData)
+
         // calculate an overall volume value
         var total = 0
-        for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-            total += self.streamData[i]
+        for (var i = 0; i < self.streamData.length; i++) {
+            total += (self.streamData[i]/255)
         }
         self.lastVolume = self.volume
-        self.volume = total
+        self.volume = total/self.streamData.length // float between 0 and 1
+
+        var volumes = []
+        for (var i=0; i<4; i++) {
+            volumes[i] = 0
+            for(var j=0; j<self.streamData.length/4; j++) {
+                volumes[i] += (self.streamData[j]/255)
+            }
+            volumes[i] = volumes[i]/ (self.streamData.length/4)
+        }
+        self.lastVolumes = self.volumes
+        self.volumes = volumes
     }
-    setInterval(sampleAudioStream, 20)
+    setInterval(sampleAudioStream, 100)
 }
-
-// function getS(arr, lastResult) {
-//     var rate = arr.length/10, result = [], difference = []
-
-//     for(var i=0; i<10; i++) {
-//         result[i] = 0
-//         for(var j=0;j<rate; j++) {
-//             result[i] += arr[(i*10)+j] 
-//         }
-//         difference.push(lastResult[i] - result[i])
-//     }
-//     var changedMost = Math.max.apply(Math,difference)
-//     console.log( difference, difference.indexOf(changedMost))
-//     return result
-// }
 
 var Visualizer = function() {
 
@@ -59,8 +65,12 @@ var Visualizer = function() {
         var centerY = field.getHeight()/2
 
         function parseAudioFrame() {
-            diff =  (audioSource.volume)/30 // ((audioSource.lastVolume - audioSource.volume) + audioSource.volume)/30
-            field.click(centerX, centerY, diff, diff*0.90)
+            volume = (audioSource.volume)*1000
+
+            
+            field.click(centerX, centerY, volume, volume*0.90)
+
+            if(audioSource.volume-audioSource.lastVolume > 0.01 ) field.click(centerX, centerY, volume*1.20, volume*0.95)
         }
 
         function random(max) {

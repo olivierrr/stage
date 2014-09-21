@@ -47,9 +47,9 @@
 
 	//
 
-	_stage.mousedown = _stage.touchstart = onMouseDown
-	_stage.mousemove = _stage.touchmove = onMouseMove
-	_stage.mouseup = _stage.touchend = onMouseUp
+	// _stage.mousedown = _stage.touchstart = onMouseDown
+	// _stage.mousemove = _stage.touchmove = onMouseMove
+	// _stage.mouseup = _stage.touchend = onMouseUp
 	function onMouseDown() {
 		_mouseIsDown = true
 	}
