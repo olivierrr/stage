@@ -12,6 +12,7 @@ sound visualizer template
 
 when the visualizer callback is executed it will be passed 2 objects
 ```container``` is a dom handle
+
 ```data``` object contains a few properties that are continuously updated
 
 ### data properties
@@ -29,3 +30,7 @@ mean average of mid frequencies
 
 ####```data.volume.lows``` 
 mean average of low frequencies
+
+
+###```data.frequencies```
+array of 128 values, each value represents a frequency
