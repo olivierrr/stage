@@ -12,6 +12,8 @@ var SoundCloudAudioSource = function(player) {
 
     //
 
+    var volumeScale = 1 //todo
+
     this.lastVolume = 0
     this.volume = 0
     this.lastVolumes = [0,0,0,0]
@@ -41,6 +43,9 @@ var SoundCloudAudioSource = function(player) {
         self.lastVolume = self.volume
         self.volume = total/self.streamData.length // float between 0 and 1
 
+        // calculate scale // todo
+        volumeScale = (volumeScale-(volumeScale*0.1)) + (self.volume*0.1)
+
         // calculate volumes in 4 frequency groups
         var volumes = []
         for (var i=0; i<4; i++) {
@@ -68,6 +73,7 @@ var Visualizer = function() {
         function parseAudioFrame() {
             volume = (audioSource.volume)*1000
             field.click(centerX, centerY, volume, volume*0.90)
+            //if(audioSource.volume-audioSource.lastVolume < 0.000001) field.click( centerX, centerY, 500, 90)
             if(audioSource.volume-audioSource.lastVolume > 0.01 ) field.click(centerX, centerY, volume*1.20, volume*0.95)
         }
 
