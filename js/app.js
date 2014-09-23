@@ -12,13 +12,16 @@ var SoundCloudAudioSource = function(player) {
 
     //
 
-    var volumeScale = 1 //todo
-
-    this.lastVolume = 0
-    this.volume = 0
-    this.lastVolumes = [0,0,0,0]
-    this.volumes = [0,0,0,0]
     this.streamData = new Uint8Array(analyser.frequencyBinCount)
+
+    this.frequency = []
+
+    this.volume = {
+        all: 0,
+        highs: 0,
+        mids: 0,
+        lows: 0
+    }
 
     //
 
@@ -32,55 +35,61 @@ var SoundCloudAudioSource = function(player) {
 
     var sampleAudioStream = function() {
 
-        // get data
+        // get raw data
         analyser.getByteFrequencyData(self.streamData)
 
-        // calculate an overall volume value
+        // frequency
+        self.frequency = []
+        for(var i=0; i<self.streamData.length; i++) {
+            self.frequency.push(self.streamData[i]/255)
+        }
+
+        // volume.all
         var total = 0
-        for (var i = 0; i < self.streamData.length; i++) {
-            total += (self.streamData[i]/255)
+        for (var i = 0; i < self.frequency.length; i++) {
+            total += self.frequency[i]
         }
-        self.lastVolume = self.volume
-        self.volume = total/self.streamData.length // float between 0 and 1
+        self.volume.all = total/self.frequency.length
 
-        // calculate scale // todo
-        volumeScale = (volumeScale-(volumeScale*0.1)) + (self.volume*0.1)
-
-        // calculate volumes in 4 frequency groups
-        var volumes = []
-        for (var i=0; i<4; i++) {
-            volumes[i] = 0
-            for(var j=0; j<self.streamData.length/4; j++) {
-                volumes[i] += (self.streamData[j]/255)
-            }
-            volumes[i] = volumes[i]/ (self.streamData.length/4)
+        // volume.highs
+        var highs = 0
+        for(var i=0; i < 85; i++) {
+            highs += self.frequency[i]
         }
-        self.lastVolumes = self.volumes
-        self.volumes = volumes
+        self.volume.highs = (highs/85)
+
+        // volume.mids
+        var mids = 0
+        for(var i=85; i < 170; i++) {
+            mids += self.frequency[i] || 0
+        }
+        self.volume.mids = (mids/85)
+
+        // volume.lows
+        var lows = 0
+        for(var i=170; i < 255; i++) {
+            lows += self.frequency[i] || 0
+        }
+        self.volume.lows = (lows/85)
+
     }
-    setInterval(sampleAudioStream, 100)
+    setInterval(sampleAudioStream, 20)
 }
 
 var Visualizer = function() {
 
     this.init = function(options) {
-        audioSource = options.audioSource
+        var audioSource = options.audioSource
 
         var field = Field(document.getElementById(options.containerId))
         var centerX = field.getWidth()/2
         var centerY = field.getHeight()/2
 
         function parseAudioFrame() {
-            volume = (audioSource.volume)*1000
+            volume = (audioSource.volume.highs)*1000
             field.click(centerX, centerY, volume, volume*0.90)
-            //if(audioSource.volume-audioSource.lastVolume < 0.000001) field.click( centerX, centerY, 500, 90)
-            if(audioSource.volume-audioSource.lastVolume > 0.01 ) field.click(centerX, centerY, volume*1.20, volume*0.95)
         }
 
-        function random(max) {
-            return Math.floor((Math.random() * max) + 1);
-        }
-        
         function loop() {
             parseAudioFrame()
             requestAnimationFrame(loop)
