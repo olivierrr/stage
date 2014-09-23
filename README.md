@@ -35,3 +35,6 @@ mean average of low frequencies
 
 ###```data.frequencies```
 array of 128 values, each value represents a frequency
+
+###```data.raw```
+raw Uint8Array

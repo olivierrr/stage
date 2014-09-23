@@ -12,7 +12,7 @@ var SoundCloudAudioSource = function(player) {
 
     //
 
-    this.streamData = new Uint8Array(analyser.frequencyBinCount)
+    this.raw = new Uint8Array(analyser.frequencyBinCount)
 
     this.frequency = []
 
@@ -36,12 +36,12 @@ var SoundCloudAudioSource = function(player) {
     var sampleAudioStream = function() {
 
         // get raw data
-        analyser.getByteFrequencyData(self.streamData)
+        analyser.getByteFrequencyData(self.raw)
 
         // frequency
         self.frequency = []
-        for(var i=0; i<self.streamData.length; i++) {
-            self.frequency.push(self.streamData[i]/255)
+        for(var i=0; i<self.raw.length; i++) {
+            self.frequency.push(self.raw[i]/255)
         }
 
         // volume.all
