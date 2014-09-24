@@ -53,24 +53,26 @@ var SoundCloudAudioSource = function(player) {
 
         // volume.highs
         var highs = 0
-        for(var i=0; i < 85; i++) {
+        for(var i=0; i < 42; i++) {
             highs += self.frequency[i]
         }
-        self.volume.highs = (highs/85)
+        self.volume.highs = (highs/42)
 
         // volume.mids
         var mids = 0
-        for(var i=85; i < 170; i++) {
+        for(var i=42; i < 84; i++) {
             mids += self.frequency[i] || 0
         }
-        self.volume.mids = (mids/85)
+        self.volume.mids = (mids/42)
 
         // volume.lows
         var lows = 0
-        for(var i=170; i < 255; i++) {
+        for(var i=63; i < 128; i++) {
             lows += self.frequency[i] || 0
         }
-        self.volume.lows = (lows/85)
+        self.volume.lows = (lows/42)
+
+        console.log(self.raw.length)
 
     }
     setInterval(sampleAudioStream, 20)
@@ -86,7 +88,7 @@ var Visualizer = function() {
         var centerY = field.getHeight()/2
 
         function parseAudioFrame() {
-            volume = (audioSource.volume.highs)*1000
+            volume = ((audioSource.volume.mids+audioSource.volume.highs)/2)*1000
             field.click(centerX, centerY, volume, volume*0.90)
         }
 
@@ -175,47 +177,51 @@ var SoundcloudLoader = function(player,uiUpdater) {
  * @constructor
  */
 var UiUpdater = function() {
-    var controlPanel = document.getElementById('controlPanel');
-    var trackInfoPanel = document.getElementById('trackInfoPanel');
-    var infoImage = document.getElementById('infoImage');
-    var infoArtist = document.getElementById('infoArtist');
-    var infoTrack = document.getElementById('infoTrack');
-    var messageBox = document.getElementById('messageBox');
+
+    var controlPanel = document.getElementById('controlPanel')
+    var trackInfoPanel = document.getElementById('trackInfoPanel')
+    var infoImage = document.getElementById('infoImage')
+    var infoArtist = document.getElementById('infoArtist')
+    var infoTrack = document.getElementById('infoTrack')
+    var messageBox = document.getElementById('messageBox')
 
     this.clearInfoPanel = function() {
-        // first clear the current contents
-        infoArtist.innerHTML = "";
-        infoTrack.innerHTML = "";
-        trackInfoPanel.className = 'hidden';
-    };
+
+        infoArtist.innerHTML = ''
+        infoTrack.innerHTML = ''
+        trackInfoPanel.className = 'hidden'
+    }
+
     this.update = function(loader) {
-        // update the track and artist into in the controlPanel
-        var artistLink = document.createElement('a');
-        artistLink.setAttribute('href', loader.sound.user.permalink_url);
-        artistLink.innerHTML = loader.sound.user.username;
-        var trackLink = document.createElement('a');
-        trackLink.setAttribute('href', loader.sound.permalink_url);
+
+        var artistLink = document.createElement('a')
+        artistLink.setAttribute('href', loader.sound.user.permalink_url)
+        artistLink.innerHTML = loader.sound.user.username
+
+        var trackLink = document.createElement('a')
+        trackLink.setAttribute('href', loader.sound.permalink_url)
 
         if(loader.sound.kind=="playlist"){
-            trackLink.innerHTML = "<p>" + loader.sound.tracks[loader.streamPlaylistIndex].title + "</p>" + "<p>"+loader.sound.title+"</p>";
+            trackLink.innerHTML = "<p>" + loader.sound.tracks[loader.streamPlaylistIndex].title + "</p>" + "<p>"+loader.sound.title+"</p>"
         }else{
-            trackLink.innerHTML = loader.sound.title;
+            trackLink.innerHTML = loader.sound.title
         }
 
-        var image = loader.sound.artwork_url ? loader.sound.artwork_url : loader.sound.user.avatar_url; // if no track artwork exists, use the user's avatar.
-        infoImage.setAttribute('src', image);
+        // if no track artwork exists, use the user's avatar.
+        var image = loader.sound.artwork_url ? loader.sound.artwork_url : loader.sound.user.avatar_url 
+        infoImage.setAttribute('src', image)
 
-        infoArtist.innerHTML = '';
-        infoArtist.appendChild(artistLink);
+        infoArtist.innerHTML = ''
+        infoArtist.appendChild(artistLink)
 
-        infoTrack.innerHTML = '';
-        infoTrack.appendChild(trackLink);
+        infoTrack.innerHTML = ''
+        infoTrack.appendChild(trackLink)
 
-        // display the track info panel
-        trackInfoPanel.className = '';
+        // toggle class from 'hidden'
+        trackInfoPanel.className = ''
 
         // add a hash to the URL so it can be shared or saved
-        var trackToken = loader.sound.permalink_url.substr(22);
+        var trackToken = loader.sound.permalink_url.substr(22)
         window.location = '#' + trackToken;
     };
     this.toggleControlPanel = function() {
@@ -252,8 +258,9 @@ var UiUpdater = function() {
 
 window.onload = function init() {
 
-    var visualizer = new Visualizer();
     var player =  document.getElementById('player');
+
+    var visualizer = new Visualizer();
     var uiUpdater = new UiUpdater();
     var loader = new SoundcloudLoader(player,uiUpdater);
 
@@ -321,6 +328,4 @@ window.onload = function init() {
                 break;
         }   
     }
-
-
 };
