@@ -1,8 +1,8 @@
 stage
 =====
 
-sound visualizer template
-
+###[live demo](http://olivierrr.github.io/stage/#electricmantis/flips-and-flops-drips-and-1)
+warning: it's loud
 
 ## usage
 
